@@ -1,11 +1,11 @@
-import tempfile
-
 from frogsay.client import open_client
+
+from .util import temp_dir_name
 
 
 def test_empty_cache_fetches_more_tips():
-    with tempfile.NamedTemporaryFile() as file:
-        with open_client(file.name) as client:
+    with temp_dir_name() as db_dir:
+        with open_client(db_dir) as client:
             # Exhaust all tips
             tries = 0
             max_tips = 49
@@ -17,6 +17,5 @@ def test_empty_cache_fetches_more_tips():
 
             assert tries == max_tips
 
-        # Ensure the cache is empty
-        contents = file.read()
-        assert contents == b''
+        with open_client(db_dir) as client:
+            assert client.num_cached_tips == 0

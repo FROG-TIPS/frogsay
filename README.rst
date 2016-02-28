@@ -14,6 +14,11 @@ Frogsay
  ( >__< )
  ^^ ~~ ^^
 
+.. image:: https://img.shields.io/pypi/v/frogsay.svg
+    :target: https://pypi.python.org/pypi/frogsay
+
+.. image:: https://travis-ci.org/clibc/frogsay.svg?branch=master
+    :target: https://travis-ci.org/clibc/frogsay
 
 -----------
 Quick start
@@ -28,3 +33,8 @@ then
 ::
 
     frogsay
+
+or you can obviously do something like
+
+.. image:: example.png
+    :alt: frogsay | lolcat

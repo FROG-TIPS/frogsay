@@ -1,25 +1,20 @@
 import contextlib
-import os
 import random
 
-try:
-    # OS X apparently lacks gdbm and will fail unless we monkey-patch it
-    import anydbm
-    anydbm.__defaultmod = __import__('dumbdbm')
-except:
-    pass
-
-import shelve
-
+import six
+import semidbm
 from RIBBIT.client import RIBBITClient
 
 
+str = six.text_type
+
+
 @contextlib.contextmanager
-def open_client(cache_file):
+def open_client(cache_dir):
     """\
     Open and return a FROG tips client backed by a cache.
     """
-    with Cache(cache_file) as cache:
+    with Cache(cache_dir) as cache:
         yield Client(cache)
 
 
@@ -27,23 +22,16 @@ class Cache(object):
     """\
     This is a more Pythonic wrapper around shelve's open/close functions.
     """
-    def __init__(self, cache_file):
-        self._cache_file = cache_file
+    def __init__(self, cache_dir):
+        self._cache_dir = cache_dir
         self._cache = None
 
     def __enter__(self):
-        # Create the parent directories if they don't exist
-        try:
-            parent = os.path.dirname(self._cache_file)
-            os.makedirs(parent)
-        except OSError:
-            pass
-
-        self._cache = shelve.open(self._cache_file)
+        self._cache = semidbm.open(self._cache_dir, flag='c')
         return self._cache
 
     def __exit__(self, *ex_info):
-        self._cache.close()
+        self._cache.close(compact=True)
 
 
 class Client(object):
@@ -58,7 +46,11 @@ class Client(object):
 
     @property
     def should_refresh(self):
-        return len(self._cache) == 0
+        return len(self._cache.keys()) == 0
+
+    @property
+    def num_cached_tips(self):
+        return len(self._cache.keys())
 
     def frog_tip(self):
         """\
@@ -73,4 +65,14 @@ class Client(object):
                 cache[str(number)] = tip
 
         choice = random.choice(list(cache.keys()))
-        return cache.pop(choice)
+
+        # We'll get a bytes() object here during real usage
+        # but a text-like object in the tests. Good job Python
+        try:
+            tip = cache[choice].decode()
+        except AttributeError:
+            tip = cache[choice]
+
+        del cache[choice]
+
+        return tip

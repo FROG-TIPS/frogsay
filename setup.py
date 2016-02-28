@@ -13,6 +13,8 @@ with codecs_open('{0}/frogsay/version.py'.format(src_dir), encoding='utf-8') as 
 
 requirements = [
     'click == 6.2',
+    'semidbm == 0.5.1',
+    'six == 1.10.0',
     'python-RIBBIT == 1.0.2.dev0',
 ]
 

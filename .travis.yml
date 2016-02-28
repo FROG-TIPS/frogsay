@@ -1,0 +1,19 @@
+language: python
+python:
+   - 2.7
+   # Click doesn't support 3.2 so we don't support it
+   # - 3.2
+   - 3.3
+   - 3.4
+   - 3.5
+   - pypy
+   - pypy3
+
+install:
+   - "pip install ."
+   - "pip install -r requirements/test.txt"
+
+script: "nosetests"
+
+notifications:
+   email: false
